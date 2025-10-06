@@ -1,0 +1,9 @@
+Node.js utility ADDONS
+
+Commands to run:
+
+npx node-gyp clean
+npx node-gyp configure
+npx node-gyp build
+
+node.js run

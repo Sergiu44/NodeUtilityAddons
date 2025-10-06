@@ -1,0 +1,19 @@
+{
+  "name": "design-patterns",
+  "version": "1.0.0",
+  "description": "",
+  "main": "asyncIO.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild",
+    "build:addon": "node-gyp rebuild"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "gypfile": true,
+  "dependencies": {
+    "argon2": "^0.44.0",
+    "node-addon-api": "^8.5.0"
+  }
+}
