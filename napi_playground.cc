@@ -4,6 +4,9 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <chrono>
+#include <thread>
+#include "thread/thread_worker.h"
 
 class HashWorker : public Napi::AsyncWorker {
 public:
@@ -167,11 +170,60 @@ Napi::Value HashPasswordAsync(const Napi::CallbackInfo& info) {
     return deferred.Promise();
 }
 
+Napi::Value SleepThread(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    if(info.Length() < 1) {
+        Napi::TypeError::New(env, "Expected at least one argument").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    if(!info[0].IsNumber()) {
+        Napi::TypeError::New(env, "Expected a number").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    double ms = info[0].As<Napi::Number>().DoubleValue();
+
+    if(ms < 0) {
+        Napi::TypeError::New(env, "ms must be greater than 0").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(ms)));
+    return env.Undefined();
+}
+
+Napi::Value BenchmarkSync(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    if(info.Length() < 1 || !info[0].IsFunction()) {
+        Napi::TypeError::New(env, "Expected a function").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    info[0].As<Napi::Function>().Call(env.Global(), {});
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    return Napi::Number::New(env, duration.count());
+}
+
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
     exports.Set("hello", Napi::Function::New(env, Hello));
     exports.Set("hello1", Napi::Function::New(env, Hello1));
     exports.Set("hashPassword", Napi::Function::New(env, HashPassword));
     exports.Set("hashPasswordAsync", Napi::Function::New(env, HashPasswordAsync));
+    exports.Set("sleepThread", Napi::Function::New(env, SleepThread));
+    exports.Set("benchmarkSync", Napi::Function::New(env, BenchmarkSync));
+    
+    // Thread worker functions
+    exports.Set("startWorker", Napi::Function::New(env, StartWorker));
+    exports.Set("stopWorker", Napi::Function::New(env, StopWorker));
+    exports.Set("isWorkerRunning", Napi::Function::New(env, IsWorkerRunning));
+    
     return exports;
 }
 

@@ -2,7 +2,8 @@
   "targets": [
     {
       "target_name": "addon",
-      "sources": [ "hello_napi.cc" ],
+      "sources": [ "napi_playground.cc", "thread/thread_worker.cc" ],
+      "headers": [ "thread/thread_worker.h" ],
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")"
       ],
